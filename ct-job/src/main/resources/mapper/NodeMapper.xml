@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ct.job.mapper.NodeMapper">
+
+    <resultMap id="NodeBaseResultMap" type="com.ct.job.model.Node">
+        <id column="id" property="id"></id>
+        <result column="node_id" property="nodeId"></result>
+        <result column="row_num" property="rowNum"></result>
+        <result column="counts" property="counts"></result>
+        <result column="weight" property="weight"></result>
+        <result column="status" property="status"></result>
+        <result column="notify_cmd" property="notifyCmd"></result>
+        <result column="notify_value" property="notifyValue"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="update_time" property="updateTime"></result>
+    </resultMap>
+
+    <sql id="NodeTableName">
+        job_node
+    </sql>
+
+    <sql id="NodeAllColumn">
+        id,node_id,row_num,counts,weight,status,notify_cmd,notify_value,create_time,update_time
+    </sql>
+
+    <select id="getEnableNodes" resultMap="NodeBaseResultMap" >
+        SELECT <include refid="NodeAllColumn"></include> FROM
+        <include refid="NodeTableName"></include>
+        WHERE status=1
+    </select>
+
+    <select id="getByNodeId" resultMap="NodeBaseResultMap" >
+        SELECT <include refid="NodeAllColumn"></include> FROM
+        <include refid="NodeTableName"></include>
+        where node_id=#{nodeId}
+    </select>
+
+    <select id="getNextRowNum" resultType="java.lang.Long" >
+        SELECT ifnull(max(row_num),0)+1 as row_num FROM
+        <include refid="NodeTableName"></include>
+
+    </select>
+
+    <insert id="insert">
+        insert into <include refid="NodeTableName"></include>(
+        node_id,
+        row_num
+
+        )
+        values (
+        #{node.nodeId},
+        #{node.rowNum}
+
+        )
+    </insert>
+
+
+    <update id="updateHeartBeat" >
+        update
+        <include refid="NodeTableName"/>
+        SET update_time=now()
+        where id=#{nodeId}
+    </update>
+
+    <update id="resetNotifyInfo" >
+        update
+        <include refid="NodeTableName"/>
+        set
+        notify_cmd=#{notifyCmd}
+        where node_id=#{nodeId}
+    </update>
+
+    <update id="addCounts" >
+        update
+        <include refid="NodeTableName"/>
+        set counts=counts+1
+        where node_id=#{nodeId}
+    </update>
+
+    <select id="count" resultType="java.lang.Integer" >
+        SELECT count(*) FROM
+        <include refid="NodeTableName"></include>
+    </select>
+
+
+
+</mapper>

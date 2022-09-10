@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.konka.iot.kilink.job.mapper.TaskMapper">
+
+    <resultMap id="TaskBaseResultMap" type="com.konka.iot.kilink.job.model.Task">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="cron_expr" property="cronExpr"></result>
+        <result column="status" property="status"></result>
+        <result column="fail_count" property="failCount"></result>
+        <result column="success_count" property="successCount"></result>
+        <result column="invoke_info" property="invokeInfo"></result>
+        <result column="version" property="version"></result>
+        <result column="node_id" property="nodeId"></result>
+        <result column="first_start_time" property="firstStartTime"></result>
+        <result column="next_start_time" property="nextStartTime"></result>
+        <result column="frag" property="frag"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="update_time" property="updateTime"></result>
+        <association property="taskDetail" column="id" select="getDetail"></association>
+    </resultMap>
+
+
+
+    <sql id="TaskTableName">
+        job_task
+    </sql>
+
+
+    <sql id="TaskAllColumn">
+        id,name,cron_expr,status,fail_count,success_count,invoke_info,version,node_id,first_start_time,next_start_time,frag,recover,create_time,update_time
+    </sql>
+
+
+    <resultMap id="TaskDetailBaseResultMap" type="com.konka.iot.kilink.job.model.TaskDetail">
+        <id column="id" property="id"></id>
+        <result column="task_id" property="taskId"></result>
+        <result column="retry_count" property="retryCount"></result>
+        <result column="start_time" property="startTime"></result>
+        <result column="end_time" property="endTime"></result>
+        <result column="status" property="status"></result>
+        <result column="error_msg" property="errorMsg"></result>
+        <result column="version" property="version"></result>
+        <result column="node_id" property="nodeId"></result>
+        <result column="notify_cmd" property="notifyCmd"></result>
+        <result column="notify_value" property="notifyValue"></result>
+    </resultMap>
+
+    <sql id="TaskDetailTableName">
+        job_task_detail
+    </sql>
+
+    <sql id="TaskDetailAllColumn">
+        id,task_id,retry_count,start_time,end_time,status,error_msg,version,node_id,notify_cmd,notify_value
+    </sql>
+    <select id="getDetail" resultMap="TaskDetailBaseResultMap" >
+        SELECT <include refid="TaskDetailAllColumn"></include> FROM
+        <include refid="TaskDetailTableName"></include>
+        where task_id=#{taskId}
+    </select>
+
+    <insert id="insertTask" useGeneratedKeys="true" keyProperty="task.id">
+        insert into <include refid="TaskTableName"></include>(
+        name,
+        cron_expr,
+        status,
+        fail_count,
+        success_count,
+        invoke_info,
+        version,
+        node_id,
+        first_start_time,
+        next_start_time,
+        frag,
+        recover
+        )
+        values (
+        #{task.name},
+        #{task.cronExpr},
+        #{task.status},
+        #{task.failCount},
+        #{task.successCount},
+        #{task.invokeInfo},
+        #{task.version},
+        #{task.nodeId},
+        #{task.firstStartTime},
+        #{task.nextStartTime},
+        #{task.frag},
+        #{task.recover}
+        )
+    </insert>
+
+    <update id="updateTaskStatu" >
+        update
+        <include refid="TaskTableName"/>
+        SET status=#{status},
+        node_id=#{nodeId}
+        where id=#{taskId} and status=0
+    </update>
+
+    <update id="reInitTask" >
+        update
+        <include refid="TaskTableName"/>
+        SET status=#{status}
+
+        where node_id=#{nodeId}
+    </update>
+
+    <update id="updateSon" >
+        update
+        <include refid="TaskTableName"/>
+        SET sid=#{sid}
+
+        where id=#{id}
+    </update>
+
+    <select id="getNotStartTask" resultMap="TaskBaseResultMap" >
+        SELECT <include refid="TaskAllColumn"></include> FROM
+        <include refid="TaskTableName"></include>
+        WHERE date_sub(now(),interval #{time} second ) >= next_start_time and status=0
+    </select>
+
+    <select id="getAllTask" resultType="java.lang.String" >
+        SELECT name FROM
+        <include refid="TaskTableName"></include>
+
+    </select>
+
+    <update id="updateWithVersion" >
+        update
+        <include refid="TaskTableName"/>
+        set
+        version=version+1,
+        node_id=#{task.nodeId},
+        status=#{task.status},
+        cron_expr=#{task.cronExpr},
+        next_start_time=#{task.nextStartTime},
+        success_count=#{task.status}
+        where id=#{task.id}
+    </update>
+
+    <update id="updateTask" >
+        update
+        <include refid="TaskTableName"/>
+        set
+        next_start_time=#{task.nextStartTime},
+        status=#{task.status}
+        where id=#{task.id}
+    </update>
+
+
+
+    <select id="get" resultMap="TaskBaseResultMap" >
+        SELECT <include refid="TaskAllColumn"></include> FROM
+        <include refid="TaskTableName"></include>
+        where id=#{id}
+    </select>
+
+    <update id="updateTaskDetail" >
+        update
+        <include refid="TaskDetailTableName"/>
+        set
+        task_id=#{taskDetail.taskId},
+
+        start_time=#{taskDetail.startTime},
+        end_time=#{taskDetail.endTime},
+        status=#{taskDetail.status},
+        error_msg=#{taskDetail.errorMsg},
+        version=version+1,
+        node_id=#{taskDetail.nodeId}
+        where id=#{taskDetail.id}
+    </update>
+
+    <insert id="insertTaskDetail">
+        insert into <include refid="TaskDetailTableName"></include>(
+        task_id,
+
+        start_time,
+        end_time,
+
+        error_msg,
+        version,
+        node_id
+        )
+        values (
+        #{taskDetail.taskId},
+
+        #{taskDetail.startTime},
+        #{taskDetail.endTime},
+
+        #{taskDetail.errorMsg},
+        #{taskDetail.version},
+        #{taskDetail.nodeId}
+
+        )
+    </insert>
+
+    <select id="listRecoverTasks" resultMap="TaskBaseResultMap" >
+        SELECT t.id,name,cron_expr,t.status,fail_count,success_count,invoke_info,t.version,t.node_id,first_start_time,next_start_time,frag,recover,t.create_time,t.update_time FROM
+        <include refid="TaskTableName"></include> t
+        left join job_node n
+        on t.node_id=n.node_id
+        where (t.status=1 or t.status=2) and date_sub(now(),interval #{timeout} second ) > n.update_time
+    </select>
+
+    <delete id="deleteTask">
+            delete from
+            <include refid="TaskTableName"></include>
+    </delete>
+
+    <delete id="deleteTaskDetail">
+        delete from
+        <include refid="TaskDetailTableName"></include>
+    </delete>
+</mapper>
