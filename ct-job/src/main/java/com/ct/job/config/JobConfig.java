@@ -17,6 +17,7 @@ import java.util.Date;
 public class JobConfig {
     @Value("${ctjob.node.id:database}")
     private String registerType;
+
     @Value("${ctjob.node.id:1}")
     private Long nodeId;
     

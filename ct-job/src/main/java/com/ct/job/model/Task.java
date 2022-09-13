@@ -19,7 +19,6 @@ import java.util.Date;
 
 /**
  * 任务实体
- *
  */
 @Data
 @Builder

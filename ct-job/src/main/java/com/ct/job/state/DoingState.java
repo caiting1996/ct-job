@@ -4,7 +4,9 @@ import com.ct.job.model.Task;
 
 import java.text.ParseException;
 
-
+/**
+ * 运行状态
+ */
 public class DoingState extends AbstractTaskState {
 
     public DoingState(Task task){

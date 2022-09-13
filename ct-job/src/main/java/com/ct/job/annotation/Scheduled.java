@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Scheduled {
     String corn() default "";
-
     int frag() default 1;
 
 }

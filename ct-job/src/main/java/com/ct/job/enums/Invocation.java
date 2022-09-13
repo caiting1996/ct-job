@@ -19,7 +19,6 @@ public class Invocation implements Serializable {
 
     private Object[] args;
 
-
     public Invocation() {
 
     }

@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 注册中心接口
+ */
 public interface Register {
     void insertTask(Task task);
     List<String> getAllTask();

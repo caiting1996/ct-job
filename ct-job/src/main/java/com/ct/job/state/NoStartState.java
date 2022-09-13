@@ -4,7 +4,9 @@ import com.ct.job.model.Task;
 
 import java.text.ParseException;
 
-
+/**
+ * 任务未开始状态
+ */
 public class NoStartState extends AbstractTaskState{
     public NoStartState(Task task){
         super(task);

@@ -7,6 +7,9 @@ import com.ct.job.model.TaskDetail;
 import java.text.ParseException;
 import java.util.Date;
 
+/**
+ * 任务状态抽象类
+ */
 public class AbstractTaskState implements TaskState {
     protected Task task;
     public AbstractTaskState(Task task){

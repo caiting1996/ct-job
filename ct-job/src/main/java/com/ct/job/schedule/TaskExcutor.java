@@ -20,15 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+/**
+ * 任务执行类
+ */
 @Component
 public class TaskExcutor {
     private static final Logger logger= (Logger) LoggerFactory.getLogger(TaskExcutor.class);
     @Autowired
     private JobConfig config;
-    //@Autowired
-    //private TaskMapper taskMapper;
-    //@Autowired
-    //private NodeMapper nodeMapper;
     private Strategy strategy;
     private Map<Long,Future> doingFutures = new HashMap<>();
     private DelayQueue<DelayItem<Task>> taskQueue=new DelayQueue<>();
@@ -55,12 +54,10 @@ public class TaskExcutor {
                 Thread.sleep(config.getFetchDuration());
                 //获取可用节点
                 List<Node> nodes= RegisterContext.chooseRegister().getEnableNodes(config.getHeartBeatSeconds()*2);
-                //List<Node> nodes= nodeMapper.getEnableNodes(config.getHeartBeatSeconds()*2);
                 if(nodes.size()==0) continue;
 
                 //获取规定时间后将要执行的任务
                 List<Task> tasks=RegisterContext.chooseRegister().getNotStartTask(config.getFetchDuration());
-                //List<Task> tasks=taskMapper.getNotStartTask(config.getFetchDuration());
                 if(tasks.size()==0) continue;
 
                 //为任务分配执行的节点
@@ -91,7 +88,6 @@ public class TaskExcutor {
                      * 封装成延时对象放入延时队列,这里再查一次是因为上面乐观锁已经更新了版本，会导致后面结束任务更新不成功
                      */
                     task = RegisterContext.chooseRegister().get(task.getId());
-                    //task = taskMapper.get(task.getId());
                     DelayItem<Task> delayItem = new DelayItem<Task>(nextStartTime.getTime() - new Date().getTime(), task);
                     System.out.println(delayItem);
                     taskQueue.offer(delayItem);
@@ -162,7 +158,6 @@ public class TaskExcutor {
 
         if(n > 0) {
             RegisterContext.chooseRegister().addCounts(task.getTaskDetail().getNodeId());
-            //nodeMapper.addCounts(task.getTaskDetail().getNodeId());
         }
     }
 
@@ -172,7 +167,6 @@ public class TaskExcutor {
 
     public boolean stop(Long taskId) throws ParseException {
         Task task = RegisterContext.chooseRegister().get(taskId);
-        //Task task = taskMapper.get(taskId);
         /**
          * 不是自己节点的任务，本节点不能执行停用
          */
@@ -195,7 +189,6 @@ public class TaskExcutor {
          * 重置通知信息，避免重复执行停用通知
          */
         RegisterContext.chooseRegister().resetNotifyInfo(config.getNodeId(), NotifyCmd.STOP_TASK);
-        //nodeMapper.resetNotifyInfo(config.getNodeId(),NotifyCmd.STOP_TASK);
         return flag;
     }
 }

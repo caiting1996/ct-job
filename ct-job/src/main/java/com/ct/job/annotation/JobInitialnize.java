@@ -28,7 +28,6 @@ import java.util.*;
 @Component
 public class JobInitialnize implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger logger= (Logger) LoggerFactory.getLogger(JobInitialnize.class);
-
     private Map<String,Map> taskId=new HashMap();
     @Autowired
     private JobConfig config;
@@ -38,13 +37,8 @@ public class JobInitialnize implements ApplicationListener<ContextRefreshedEvent
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         logger.info("-------------开始加载定时任务----------------");
         config.setSysStartTime(new Date());
-
         RegisterContext.chooseRegister().deleteTask();
         RegisterContext.chooseRegister().deleteTaskDetail();
-        //taskMapper.deleteTask();
-        //taskMapper.deleteTaskDetail();
-        //allTask=taskMapper.getAllTask();
-        //taskMapper.reInitTask(TaskStatus.NOT_STARTED.getId(), config.getNodeId());
         if(contextRefreshedEvent.getApplicationContext().getParent()==null){
             ApplicationContext context=contextRefreshedEvent.getApplicationContext();
             Map beans=context.getBeansWithAnnotation(EnableScheduling.class);
@@ -123,7 +117,6 @@ public class JobInitialnize implements ApplicationListener<ContextRefreshedEvent
                 task.setSuccessCount(0);
                 task.setFailCount(0);
                 RegisterContext.chooseRegister().insertTask(task);
-                //taskMapper.insertTask(task);
                 temp.put(fileName+i,task.getId());
                 taskId.put(fileName,temp);
                 TaskDetail taskDetail=TaskDetail.builder()
@@ -132,7 +125,6 @@ public class JobInitialnize implements ApplicationListener<ContextRefreshedEvent
                         .version(1)
                         .build();
                 RegisterContext.chooseRegister().insertTaskDetail(taskDetail);
-                //taskMapper.insertTaskDetail(taskDetail);
                 }
             }
         }

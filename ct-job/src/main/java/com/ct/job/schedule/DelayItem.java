@@ -6,6 +6,10 @@ import javax.validation.constraints.NotNull;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 延时任务
+ * @param <T>
+ */
 public class DelayItem<T> implements Delayed {
     private final long delay;
     private final long expire;

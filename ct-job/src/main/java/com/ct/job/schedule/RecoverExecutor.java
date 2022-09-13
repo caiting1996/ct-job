@@ -20,7 +20,9 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+/**
+ * 任务恢复
+ */
 @Lazy
 @Component
 public class RecoverExecutor {
@@ -29,12 +31,6 @@ public class RecoverExecutor {
 
     @Autowired
     private JobConfig config;
-
-    //@Autowired
-    //private TaskMapper taskRepository;
-
-    //@Autowired
-    //private NodeMapper nodeRepository;
 
     /**
      * 创建节点心跳延时队列
@@ -84,7 +80,6 @@ public class RecoverExecutor {
                      * 只需要把状态再改回待执行，并且下次执行时间改成当前时间，让任务再次被调度一次
                      */
                     List<Task> tasks = RegisterContext.chooseRegister().listRecoverTasks(config.getHeartBeatSeconds() * 3);
-                   // List<Task> tasks = taskRepository.listRecoverTasks(config.getHeartBeatSeconds() * 3);
 
                     if(tasks == null || tasks.isEmpty()) {
                     	return;
@@ -93,7 +88,6 @@ public class RecoverExecutor {
                     * 先获取可用的节点列表
                     */
                     List<Node> nodes = RegisterContext.chooseRegister().getEnableNodes(config.getHeartBeatSeconds() * 2);
-                   //List<Node> nodes = nodeRepository.getEnableNodes(config.getHeartBeatSeconds() * 2);
                    if(nodes == null || nodes.isEmpty()) {
                        return;
                    }
@@ -163,16 +157,11 @@ public class RecoverExecutor {
          * 如果存在：直接根据nodeId更新当前节点的序号和时间
          */
         Node currNode= RegisterContext.chooseRegister().getByNodeId(node.getNodeId());
-        //Node currNode= nodeRepository.getByNodeId(node.getNodeId());
         if(currNode == null) {
             node.setRowNum(RegisterContext.chooseRegister().getNextRowNum());
-            //node.setRowNum(nodeRepository.getNextRowNum());
-
             RegisterContext.chooseRegister().insert(node);
-            //nodeRepository.insert(node);
         } else  {
             RegisterContext.chooseRegister().updateHeartBeat(node.getNodeId());
-            //nodeRepository.updateHeartBeat(node.getNodeId());
             NotifyCmd cmd = currNode.getNotifyCmd();
             String notifyValue = currNode.getNotifyValue();
             if(cmd != null && cmd != NotifyCmd.NO_NOTIFY) {
@@ -188,7 +177,6 @@ public class RecoverExecutor {
                  * 先重置通知再说，以免每次心跳无限执行通知下面更新逻辑
                  */
                 RegisterContext.chooseRegister().resetNotifyInfo(currNode.getNodeId(),cmd);
-                //nodeRepository.resetNotifyInfo(currNode.getNodeId(),cmd);
                 /**
                  * 执行操作
                  */

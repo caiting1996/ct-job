@@ -4,7 +4,9 @@ import com.ct.job.model.Task;
 
 import java.text.ParseException;
 
-
+/**
+ * 任务等待状态
+ */
 public class PendingState extends AbstractTaskState{
     public PendingState(Task task){
         super(task);

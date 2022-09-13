@@ -138,7 +138,7 @@
         cron_expr=#{task.cronExpr},
         next_start_time=#{task.nextStartTime},
         success_count=#{task.status}
-        where id=#{task.id}
+        where id=#{task.id} and version=#{task.version}
     </update>
 
     <update id="updateTask" >
